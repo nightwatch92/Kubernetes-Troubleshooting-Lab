@@ -19,16 +19,17 @@ spec:
         - name: memory-hog
           image: busybox:1.36
           command: ["/bin/sh", "-c"]
-          # Allocates ~1MB per iteration and never frees -> crosses 128Mi limit.
+          # Allocates ~1.3MB per iteration and never frees -> crosses 128Mi limit.
           args:
             - |
               echo "starting memory allocator"
               i=0
               while true; do
-                # Append 1MB of data into a variable that is never released.
+                # Append 1MB of binary data (becomes ~1.3MB after base64) into a variable that is never released.
                 buf="${buf}$(head -c 1048576 /dev/urandom | base64)"
                 i=$((i+1))
-                echo "allocated approx ${i}Mi, sleeping 1s"
+                allocated=$((i * 4 / 3))
+                echo "allocated approx ${allocated}Mi, sleeping 1s"
                 sleep 1
               done
           resources:
